@@ -1,0 +1,3 @@
+ADD R0 R1 2
+LDI R3 R1
+AND ADD bug 1

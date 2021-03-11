@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd ../build
+cd build
 cmake ..
 make -j12 vm_tests
 cp compile_commands.json ..

@@ -23,6 +23,7 @@ To build the tests run this (from project root):
 2. `cd tests`
 3. `chmod +x build_tests.sh`
 4. `./build_tests.sh`
+5. And also put `#define RUN_TESTS` at the top of `main.cpp`  
 
 All the binaries are located in `build/src/` directory (`vm` and `vm_tests`).
 
