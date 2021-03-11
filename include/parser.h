@@ -47,9 +47,7 @@ private:
     // *op* is the opcode of the instruction
     template <Opcodes op>
     [[nodiscard]] uint16_t construct_instr(const std::vector<Expression>& line_of_exprs) const;
-    /*[[nodiscard]] uint16_t construct_add(const std::vector<Expression>& line_of_exprs) const;
-    [[nodiscard]] uint16_t construct_load_indirect(const std::vector<Expression>& line_of_exprs) const;
-    [[nodiscard]] uint16_t construct_and(const std::vector<Expression>& line_of_exprs) const;*/
+
     std::vector<uint16_t> m_instructions;
     // vector of lines of expressions
     std::vector<std::vector<Expression>> m_expressions;

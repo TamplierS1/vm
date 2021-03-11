@@ -74,6 +74,7 @@ void Parser::parse_file(const std::string& filename)
             {
                 std::cout << "Error: " << e.what() << '\n';
                 m_expressions.clear();
+                m_instructions.clear();
                 return;
             }
 
