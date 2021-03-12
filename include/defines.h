@@ -38,9 +38,10 @@ enum Opcodes
 
 enum ConditionFlags
 {
+    // each condition flag represents its own bit
     POS = 1,
     ZRO = 2,
-    NEG = 3
+    NEG = 4
 };
 
 const uint16_t g_pc_start = 0x3000;

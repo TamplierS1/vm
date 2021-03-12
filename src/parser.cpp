@@ -32,6 +32,11 @@ Parser::Parser()
     m_registers.insert({"PC", Registers::PC});
     m_registers.insert({"COND", Registers::COND});
     m_registers.insert({"COUNT", Registers::COUNT});
+
+    // Initialize condition flags
+    m_cond_flags.insert({'n', ConditionFlags::NEG});
+    m_cond_flags.insert({'z', ConditionFlags::ZRO});
+    m_cond_flags.insert({'p', ConditionFlags::POS});
 }
 
 std::vector<uint16_t> Parser::parse(const std::string& filename)
@@ -104,6 +109,7 @@ void Parser::parse_exprs()
             case NOT:
                 break;
             case BR:
+                instruction = construct_instr<Opcodes::BR>(line_of_exprs);
                 break;
             case JMP:
                 break;
@@ -154,8 +160,34 @@ Parser::Expression Parser::eval_word(const std::string& word) const
     }
     else
     {
-        // TODO: Throw better exceptions when invalid syntax is detected
-        throw "Invalid syntax.";
+        // if word is a condition flag
+        /* flags are passed as one word, so we need to iterate over it
+            to find out which flags were passed */
+        uint16_t flags = 0;  // flags are represented as a 3-bit number, with each bit corresponding to a specific flag
+        for (const char& c : word)
+        {
+            if (m_cond_flags.contains(c))
+            {
+                if (c == 'n')
+                    flags |= (1 << 11);
+                else if (c == 'z')
+                    flags |= (1 << 10);
+                else if (c == 'p')
+                    flags |= (1 << 9);
+            }
+        }
+
+        // the flags need to occupy the 3 left-most bits
+        flags = flags >> 9;
+
+        /* if flags are empty*/
+        if (!flags)
+        {
+            // TODO: Throw better exceptions when invalid syntax is detected
+            throw "Invalid syntax.";
+        }
+
+        return flags;
     }
 }
 
@@ -177,25 +209,21 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
 
     // TODO: add some kind of syntax checking
     // dr
-    if (op == Opcodes::ADD
-        || op == Opcodes::AND
-        || op == Opcodes::LDI)
+    if (op == Opcodes::ADD || op == Opcodes::AND || op == Opcodes::LDI)
     {
         dr = std::get<Registers>(line_of_exprs[1]);
         instruction |= dr << 9;
     }
 
     // sr1
-    if (op == Opcodes::ADD
-        || op == Opcodes::AND)
+    if (op == Opcodes::ADD || op == Opcodes::AND)
     {
         sr1 = std::get<Registers>(line_of_exprs[2]);
         instruction |= sr1 << 6;
     }
 
     // immediate mode bit
-    if (op == Opcodes::ADD
-        || op == Opcodes::AND)
+    if (op == Opcodes::ADD || op == Opcodes::AND)
     {
         if (std::holds_alternative<uint16_t>(line_of_exprs[3]))
         {
@@ -212,10 +240,17 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
     }
 
     // pc_offset9
-    if (op == Opcodes::LDI)
+    if (op == Opcodes::LDI || op == Opcodes::BR)
     {
-       pc_offset9 = std::get<uint16_t>(line_of_exprs[2]);
-       instruction |= pc_offset9;
+        pc_offset9 = std::get<uint16_t>(line_of_exprs[2]);
+        instruction |= pc_offset9;
+    }
+
+    // condition flags
+    if (op == Opcodes::BR)
+    {
+        uint16_t flags = std::get<uint16_t>(line_of_exprs[1]);
+        instruction |= flags << 9;
     }
 
     return instruction;
