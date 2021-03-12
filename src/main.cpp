@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
     // define pc starting position
     reg_write(Registers::PC, g_pc_start);
 
-    std::vector<uint16_t> instr = Parser::get_instance().parse("program.txt");
+    std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_branch_np.txt");
     for (int i = 0; i < instr.size(); i++)
     {
         mem_write(g_pc_start + i, instr[i]);
@@ -150,8 +150,10 @@ void update_flags(uint16_t r)
     if (r == 0)
         reg_write(Registers::COND, ConditionFlags::ZRO);
     else if (r >> 15)
+    {
         // the leftmost bit represents the number's sign
         reg_write(Registers::COND, ConditionFlags::NEG);
+    }
     else
         reg_write(Registers::COND, ConditionFlags::POS);
 }

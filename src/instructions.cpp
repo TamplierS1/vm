@@ -52,11 +52,23 @@ void and_bitwise(uint16_t instruction)
     }
     else
     {
-        // TODO: test this case
         uint16_t sr2 = instruction & (0xFFFF >> 13);
         result = reg_read(sr1) & reg_read(sr2);
     }
     reg_write(dr, result);
 
     update_flags(reg_read(dr));
+}
+
+void conditional_branch(uint16_t instruction)
+{
+    // condition flags
+    uint16_t pc_offset9 = instruction & (0xFFFF >> 7);
+    uint16_t flags = instruction >> 9 & 0x7;
+
+    if (flags & reg_read(Registers::COND))
+    {
+        uint16_t pc = reg_read(Registers::PC);
+        reg_write(Registers::PC, pc + pc_offset9);
+    }
 }

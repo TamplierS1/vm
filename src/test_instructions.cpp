@@ -31,9 +31,10 @@ TEST_CASE(" ADD instruction is executed", "[add_instruction]")
 TEST_CASE(" LDI instruction is executed", "[ldi_instruction]")
 {
     reg_write(Registers::PC, g_pc_start);
+    uint16_t pc = reg_read(Registers::PC);
 
-    mem_write(g_pc_start + 5, g_pc_start + 6);
-    mem_write(g_pc_start + 6, 10);
+    mem_write(pc + 5, pc + 6);
+    mem_write(pc + 6, 10);
 
     std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_ldi.txt");
 
@@ -42,7 +43,7 @@ TEST_CASE(" LDI instruction is executed", "[ldi_instruction]")
     REQUIRE(reg_read(Registers::R0) == 10);
 }
 
-TEST_CASE(" AND instruction is executed", "[and_instruction")
+TEST_CASE(" AND instruction is executed", "[and_instruction]")
 {
     SECTION(" in 2 registers mode")
     {
@@ -64,5 +65,44 @@ TEST_CASE(" AND instruction is executed", "[and_instruction")
         and_bitwise(instr[0]);
 
         REQUIRE(reg_read(Registers::R0) == (7 & 6));
+    }
+}
+
+TEST_CASE(" BR instruction is executed", "[br_instruction]")
+{
+    SECTION(" with 'n' passed as a condition flag")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_branch_n.txt");
+
+        update_flags(-1);
+
+        conditional_branch(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 3);
+    }
+    SECTION(" with 'z' passed as a condition flag")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_branch_z.txt");
+
+        update_flags(0);
+
+        conditional_branch(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 10);
+    }
+    SECTION(" with 'p' passed as a condition flag")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_branch_p.txt");
+
+        update_flags(20);
+
+        conditional_branch(instr[0]);
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 5);
     }
 }

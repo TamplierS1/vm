@@ -42,7 +42,8 @@ private:
      * sr1 = source register 1
      * sr2 = source register 2
      * imm5 = 5-bit immediate value
-     * pc_offfset9 = 9-bit offset to program counter*/
+     * pc_offset9 = 9-bit offset to program counter
+     * neg, zro, pos = condition flags*/
     // Constructs binary instructions from expressions
     // *op* is the opcode of the instruction
     template <Opcodes op>
@@ -54,6 +55,7 @@ private:
 
     std::map<std::string, Opcodes> m_opcodes;
     std::map<std::string, Registers> m_registers;
+    std::map<char, ConditionFlags> m_cond_flags;
 };
 
 #endif
