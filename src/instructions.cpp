@@ -79,3 +79,23 @@ void jump(uint16_t instruction)
 
     reg_write(Registers::PC, reg_read(base_r));
 }
+
+void jump_subroutine(uint16_t instruction)
+{
+    uint16_t mode = instruction & (1 << 11);
+    // save the address of the calling routine
+    reg_write(Registers::R7, reg_read(Registers::PC));
+
+    // immediate mode
+    if (mode)
+    {
+        uint16_t pc = reg_read(Registers::PC);
+        uint16_t pc_offset11 = instruction & (0xFFFF >> 5);
+        reg_write(Registers::PC, pc + pc_offset11);
+    }
+    else
+    {
+        uint16_t base_r = instruction >> 6 & 0x7;
+        reg_write(Registers::PC, reg_read(base_r));
+    }
+}

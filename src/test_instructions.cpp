@@ -138,3 +138,28 @@ TEST_CASE(" JMP instruction is executed", "[jmp_instruction]")
         REQUIRE(reg_read(Registers::PC) == g_pc_start + 10);
     }
 }
+
+TEST_CASE(" JSR instruction is executed", "[jsr_instruction]")
+{
+    SECTION(" with immediate mode")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_jsr_immediate.txt");
+
+        jump_subroutine(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 20);
+    }
+    SECTION(" with register mode")
+    {
+        reg_write(Registers::PC, g_pc_start);
+        reg_write(Registers::R2, g_pc_start + 15);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_jsr_reg.txt");
+
+        jump_subroutine(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 15);
+    }
+}

@@ -36,4 +36,11 @@ void conditional_branch(uint16_t instruction);
 
 // Unconditionally jump to the location specified the contents of the *base_r* register
 void jump(uint16_t instruction);
+
+/* Unconditionally jumps to subroutines address
+ * Modes:
+ *      Immediate - takes the address as a value embedded in the instruction
+ *      Register - takes the address from a register specified in the instruction
+ * */
+void jump_subroutine(uint16_t instruction);
 #endif  // INSTRUCTIONS_H
