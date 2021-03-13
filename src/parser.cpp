@@ -112,6 +112,7 @@ void Parser::parse_exprs()
                 instruction = construct_instr<Opcodes::BR>(line_of_exprs);
                 break;
             case JMP:
+                instruction = construct_instr<Opcodes::JMP>(line_of_exprs);
                 break;
             case LD:
                 break;
@@ -203,7 +204,7 @@ bool Parser::is_number(const std::string& str) const
 template <Opcodes op>
 uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) const
 {
-    uint16_t instruction = 0, dr, sr1, sr2, imm5, pc_offset9;
+    uint16_t instruction = 0, dr, sr1, sr2, imm5, pc_offset9, flags, base_r;
 
     instruction |= op << 12;
 
@@ -249,9 +250,15 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
     // condition flags
     if (op == Opcodes::BR)
     {
-        uint16_t flags = std::get<uint16_t>(line_of_exprs[1]);
+        flags = std::get<uint16_t>(line_of_exprs[1]);
         instruction |= flags << 9;
     }
 
+    // base register
+    if (op == Opcodes::JMP)
+    {
+        base_r = std::get<Registers>(line_of_exprs[1]);
+        instruction |= base_r << 6;
+    }
     return instruction;
 }

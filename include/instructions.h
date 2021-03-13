@@ -33,4 +33,7 @@ void and_bitwise(uint16_t instruction);
 // Branch to the location specified by pc_offset9 if any of the conditional flags are set
 // NOTE: passing no condition flags is considered illegal
 void conditional_branch(uint16_t instruction);
+
+// Unconditionally jump to the location specified the contents of the *base_r* register
+void jump(uint16_t instruction);
 #endif  // INSTRUCTIONS_H

@@ -72,3 +72,10 @@ void conditional_branch(uint16_t instruction)
         reg_write(Registers::PC, pc + pc_offset9);
     }
 }
+
+void jump(uint16_t instruction)
+{
+    uint16_t base_r = instruction >> 6 & 0x7;
+
+    reg_write(Registers::PC, reg_read(base_r));
+}
