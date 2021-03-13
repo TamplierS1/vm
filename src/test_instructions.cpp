@@ -163,3 +163,14 @@ TEST_CASE(" JSR instruction is executed", "[jsr_instruction]")
         REQUIRE(reg_read(Registers::PC) == g_pc_start + 15);
     }
 }
+
+TEST_CASE(" LD instruction is executed", "[ld_instruction]")
+{
+    reg_write(Registers::PC, g_pc_start);
+    mem_write(g_pc_start + 4, 64);
+    std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_ld.txt");
+
+    load(instr[0]);
+
+    REQUIRE(reg_read(Registers::R3) == 64);
+}

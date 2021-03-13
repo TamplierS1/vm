@@ -118,6 +118,7 @@ void Parser::parse_exprs()
                 instruction = construct_instr<Opcodes::JSR>(line_of_exprs);
                 break;
             case LD:
+                instruction = construct_instr<Opcodes::LD>(line_of_exprs);
                 break;
             case LDI:
                 instruction = construct_instr<Opcodes::LDI>(line_of_exprs);
@@ -214,7 +215,8 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
 
     // TODO: add some kind of syntax checking
     // dr
-    if (op == Opcodes::ADD || op == Opcodes::AND || op == Opcodes::LDI)
+    if (op == Opcodes::ADD || op == Opcodes::AND
+        || op == Opcodes::LDI || op == Opcodes::LD)
     {
         uint16_t dr = std::get<Registers>(line_of_exprs[1]);
         instruction |= dr << 9;
@@ -262,7 +264,8 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
     }
 
     // pc_offset9
-    if (op == Opcodes::LDI || op == Opcodes::BR)
+    if (op == Opcodes::LDI || op == Opcodes::BR
+        || op == Opcodes::LD)
     {
         uint16_t pc_offset9 = std::get<uint16_t>(line_of_exprs[2]);
         instruction |= pc_offset9;

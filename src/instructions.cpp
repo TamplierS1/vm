@@ -99,3 +99,14 @@ void jump_subroutine(uint16_t instruction)
         reg_write(Registers::PC, reg_read(base_r));
     }
 }
+
+void load(uint16_t instruction)
+{
+    uint16_t dr = instruction >> 9 & 0x7;
+    uint16_t pc_offset9 = instruction & (0xFFFF >> 7);
+    uint16_t value = mem_read(reg_read(Registers::PC) + pc_offset9);
+
+    reg_write(dr, value);
+
+    update_flags(reg_read(dr));
+}
