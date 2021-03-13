@@ -105,4 +105,72 @@ TEST_CASE(" BR instruction is executed", "[br_instruction]")
         conditional_branch(instr[0]);
         REQUIRE(reg_read(Registers::PC) == g_pc_start + 5);
     }
+    SECTION(" with 'np' passed as condition flags")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_branch_np.txt");
+
+        update_flags(-54);
+
+        conditional_branch(instr[0]);
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 5);
+
+        reg_write(Registers::PC, g_pc_start);
+        update_flags(23);
+
+        conditional_branch(instr[0]);
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 5);
+    }
+}
+
+TEST_CASE(" JMP instruction is executed", "[jmp_instruction]")
+{
+    SECTION(" with valid address")
+    {
+        reg_write(Registers::PC, g_pc_start);
+        reg_write(Registers::R2, g_pc_start + 10);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_jmp_valid.txt");
+
+        jump(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 10);
+    }
+}
+
+TEST_CASE(" JSR instruction is executed", "[jsr_instruction]")
+{
+    SECTION(" with immediate mode")
+    {
+        reg_write(Registers::PC, g_pc_start);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_jsr_immediate.txt");
+
+        jump_subroutine(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 20);
+    }
+    SECTION(" with register mode")
+    {
+        reg_write(Registers::PC, g_pc_start);
+        reg_write(Registers::R2, g_pc_start + 15);
+
+        std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_jsr_reg.txt");
+
+        jump_subroutine(instr[0]);
+
+        REQUIRE(reg_read(Registers::PC) == g_pc_start + 15);
+    }
+}
+
+TEST_CASE(" LD instruction is executed", "[ld_instruction]")
+{
+    reg_write(Registers::PC, g_pc_start);
+    mem_write(g_pc_start + 4, 64);
+    std::vector<uint16_t> instr = Parser::get_instance().parse("tests/test_ld.txt");
+
+    load(instr[0]);
+
+    REQUIRE(reg_read(Registers::R3) == 64);
 }

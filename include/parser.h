@@ -43,7 +43,9 @@ private:
      * sr2 = source register 2
      * imm5 = 5-bit immediate value
      * pc_offset9 = 9-bit offset to program counter
-     * neg, zro, pos = condition flags*/
+     * neg, zro, pos = condition flags
+     * base_r = register that stores the address of the location to jump to
+     * pc_offset11 = 11-bit offset to program counter*/
     // Constructs binary instructions from expressions
     // *op* is the opcode of the instruction
     template <Opcodes op>

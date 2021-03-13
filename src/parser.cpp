@@ -112,8 +112,13 @@ void Parser::parse_exprs()
                 instruction = construct_instr<Opcodes::BR>(line_of_exprs);
                 break;
             case JMP:
+                instruction = construct_instr<Opcodes::JMP>(line_of_exprs);
+                break;
+            case JSR:
+                instruction = construct_instr<Opcodes::JSR>(line_of_exprs);
                 break;
             case LD:
+                instruction = construct_instr<Opcodes::LD>(line_of_exprs);
                 break;
             case LDI:
                 instruction = construct_instr<Opcodes::LDI>(line_of_exprs);
@@ -203,22 +208,24 @@ bool Parser::is_number(const std::string& str) const
 template <Opcodes op>
 uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) const
 {
-    uint16_t instruction = 0, dr, sr1, sr2, imm5, pc_offset9;
+    uint16_t instruction = 0;
+    uint16_t mode = 0;
 
     instruction |= op << 12;
 
     // TODO: add some kind of syntax checking
     // dr
-    if (op == Opcodes::ADD || op == Opcodes::AND || op == Opcodes::LDI)
+    if (op == Opcodes::ADD || op == Opcodes::AND
+        || op == Opcodes::LDI || op == Opcodes::LD)
     {
-        dr = std::get<Registers>(line_of_exprs[1]);
+        uint16_t dr = std::get<Registers>(line_of_exprs[1]);
         instruction |= dr << 9;
     }
 
     // sr1
     if (op == Opcodes::ADD || op == Opcodes::AND)
     {
-        sr1 = std::get<Registers>(line_of_exprs[2]);
+        uint16_t sr1 = std::get<Registers>(line_of_exprs[2]);
         instruction |= sr1 << 6;
     }
 
@@ -228,22 +235,47 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
         if (std::holds_alternative<uint16_t>(line_of_exprs[3]))
         {
             // set immediate mode bit
+            mode = 1;
             instruction |= 1 << 5;
-            imm5 = std::get<uint16_t>(line_of_exprs[3]);
-            instruction |= imm5;
         }
-        else
+    }
+    else if (op == Opcodes::JSR)
+    {
+        if (std::holds_alternative<uint16_t>(line_of_exprs[1]))
         {
-            sr2 = std::get<Registers>(line_of_exprs[3]);
-            instruction |= sr2;
+            // set immediate mode bit
+            mode = 1;
+            instruction |= 1 << 11;
         }
     }
 
-    // pc_offset9
-    if (op == Opcodes::LDI || op == Opcodes::BR)
+    // sr2
+    if ((op == Opcodes::ADD || op == Opcodes::AND) && !mode)
     {
-        pc_offset9 = std::get<uint16_t>(line_of_exprs[2]);
+        uint16_t sr2 = std::get<Registers>(line_of_exprs[3]);
+        instruction |= sr2;
+    }
+
+    // imm5
+    if ((op == Opcodes::ADD || op == Opcodes::AND) && mode)
+    {
+        uint16_t imm5 = std::get<uint16_t>(line_of_exprs[3]);
+        instruction |= imm5;
+    }
+
+    // pc_offset9
+    if (op == Opcodes::LDI || op == Opcodes::BR
+        || op == Opcodes::LD)
+    {
+        uint16_t pc_offset9 = std::get<uint16_t>(line_of_exprs[2]);
         instruction |= pc_offset9;
+    }
+
+    // pc_offset11
+    if (op == Opcodes::JSR && mode)
+    {
+        uint16_t pc_offset11 = std::get<uint16_t>(line_of_exprs[1]);
+        instruction |= pc_offset11;
     }
 
     // condition flags
@@ -253,5 +285,16 @@ uint16_t Parser::construct_instr(const std::vector<Expression>& line_of_exprs) c
         instruction |= flags << 9;
     }
 
+    // base register
+    if (op == Opcodes::JMP)
+    {
+        uint16_t base_r = std::get<Registers>(line_of_exprs[1]);
+        instruction |= base_r << 6;
+    }
+    else if (op == Opcodes::JSR && !mode)
+    {
+        uint16_t base_r = std::get<Registers>(line_of_exprs[1]);
+        instruction |= base_r << 6;
+    }
     return instruction;
 }
